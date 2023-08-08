@@ -378,6 +378,7 @@ async def create_completion(raw_request: Request):
     use_token_ids = request.use_token_ids()
 
     if isinstance(request.prompt, list):
+        print(f'prompt is a list: {request.prompt}')
         if len(request.prompt) == 0:
             return create_error_response(HTTPStatus.BAD_REQUEST,
                                          "please provide at least one prompt")
