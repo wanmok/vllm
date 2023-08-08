@@ -375,17 +375,18 @@ async def create_completion(raw_request: Request):
 
     model_name = request.model
     request_id = f"cmpl-{random_uuid()}"
-    use_token_ids = request.use_token_ids()
 
+    use_token_ids = False
     if isinstance(request.prompt, list):
-        print(f'prompt is a list: {request.prompt}')
         if len(request.prompt) == 0:
             return create_error_response(HTTPStatus.BAD_REQUEST,
                                          "please provide at least one prompt")
         first_element = request.prompt[0]
         if isinstance(first_element, int):
+            use_token_ids = True
             prompt = request.prompt
         elif isinstance(first_element, str) or isinstance(first_element, list):
+            # TODO(@wanmok): handles multiple prompt case in list[list[int]]
             if len(request.prompt) > 1:
                 return create_error_response(
                     HTTPStatus.BAD_REQUEST,
@@ -393,6 +394,7 @@ async def create_completion(raw_request: Request):
             prompt = request.prompt[0]
     else:
         prompt = request.prompt
+
     created_time = int(time.time())
     try:
         sampling_params = SamplingParams(

@@ -1,7 +1,6 @@
 # Adapted from
 # https://github.com/lm-sys/FastChat/blob/168ccc29d3f7edc50823016105c024fe2282732a/fastchat/protocol/openai_api_protocol.py
 import time
-from functools import cached_property
 from typing import Dict, List, Literal, Optional, Union
 
 from pydantic import BaseModel, Field
@@ -95,14 +94,6 @@ class CompletionRequest(BaseModel):
     top_k: Optional[int] = -1
     ignore_eos: Optional[bool] = False
     use_beam_search: Optional[bool] = False
-
-    def use_token_ids(self) -> bool:
-        if isinstance(self.prompt, list):
-            if len(self.prompt) > 0:
-                if isinstance(self.prompt[0], list) or isinstance(self.prompt[0], int):
-                    return True
-                return False
-        return False
 
 
 class LogProbs(BaseModel):
