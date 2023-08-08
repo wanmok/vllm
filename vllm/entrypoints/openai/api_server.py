@@ -391,6 +391,7 @@ async def create_completion(raw_request: Request):
                 return create_error_response(
                     HTTPStatus.BAD_REQUEST,
                     "multiple prompts in a batch is not currently supported")
+            use_token_ids = not isinstance(first_element, str)
             prompt = request.prompt[0]
     else:
         prompt = request.prompt
