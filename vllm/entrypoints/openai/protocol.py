@@ -1,6 +1,7 @@
 # Adapted from
 # https://github.com/lm-sys/FastChat/blob/168ccc29d3f7edc50823016105c024fe2282732a/fastchat/protocol/openai_api_protocol.py
 import time
+from functools import cached_property
 from typing import Dict, List, Literal, Optional, Union
 
 from pydantic import BaseModel, Field
@@ -74,7 +75,8 @@ class ChatCompletionRequest(BaseModel):
 
 class CompletionRequest(BaseModel):
     model: str
-    prompt: Union[str, List[str]]
+    # a string, array of strings, array of tokens, or array of token arrays
+    prompt: Union[str, List[str], List[int], List[List[int]]]
     suffix: Optional[str] = None
     max_tokens: Optional[int] = 16
     temperature: Optional[float] = 1.0
@@ -94,13 +96,22 @@ class CompletionRequest(BaseModel):
     ignore_eos: Optional[bool] = False
     use_beam_search: Optional[bool] = False
 
+    @cached_property
+    def use_token_ids(self) -> bool:
+        if isinstance(self.prompt, list):
+            if len(self.prompt) > 0:
+                if isinstance(self.prompt[0], list) or isinstance(self.prompt[0], int):
+                    return True
+                return False
+        return False
+
 
 class LogProbs(BaseModel):
     text_offset: List[int] = Field(default_factory=list)
     token_logprobs: List[Optional[float]] = Field(default_factory=list)
     tokens: List[str] = Field(default_factory=list)
     top_logprobs: List[Optional[Dict[str,
-                                     float]]] = Field(default_factory=list)
+    float]]] = Field(default_factory=list)
 
 
 class CompletionResponseChoice(BaseModel):

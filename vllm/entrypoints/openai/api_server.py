@@ -3,18 +3,18 @@
 
 import argparse
 import asyncio
-from http import HTTPStatus
 import json
 import time
+from http import HTTPStatus
 from typing import AsyncGenerator, Dict, List, Optional
-from packaging import version
 
 import fastapi
+import uvicorn
 from fastapi import BackgroundTasks, Request
 from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse, StreamingResponse
-import uvicorn
+from packaging import version
 
 from vllm.engine.arg_utils import AsyncEngineArgs
 from vllm.engine.async_llm_engine import AsyncLLMEngine
@@ -405,7 +405,10 @@ async def create_completion(raw_request: Request):
     except ValueError as e:
         return create_error_response(HTTPStatus.BAD_REQUEST, str(e))
 
-    result_generator = engine.generate(prompt, sampling_params, request_id)
+    if request.use_token_ids:
+        result_generator = engine.generate(None, sampling_params, request_id, prompt_token_ids=prompt)
+    else:
+        result_generator = engine.generate(prompt, sampling_params, request_id)
 
     # Similar to the OpenAI API, when n != best_of, we do not stream the
     # results. In addition, we do not stream the results when use beam search.
