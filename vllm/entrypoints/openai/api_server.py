@@ -375,14 +375,18 @@ async def create_completion(raw_request: Request):
 
     model_name = request.model
     request_id = f"cmpl-{random_uuid()}"
+    use_token_ids = request.use_token_ids()
+
     if isinstance(request.prompt, list):
         if len(request.prompt) == 0:
             return create_error_response(HTTPStatus.BAD_REQUEST,
                                          "please provide at least one prompt")
-        if len(request.prompt) > 1:
+        first_element = request.prompt[0]
+        if not isinstance(first_element, int) and len(request.prompt) > 1:
             return create_error_response(
                 HTTPStatus.BAD_REQUEST,
                 "multiple prompts in a batch is not currently supported")
+
         prompt = request.prompt[0]
     else:
         prompt = request.prompt
@@ -405,7 +409,7 @@ async def create_completion(raw_request: Request):
     except ValueError as e:
         return create_error_response(HTTPStatus.BAD_REQUEST, str(e))
 
-    if request.use_token_ids:
+    if use_token_ids:
         result_generator = engine.generate(None, sampling_params, request_id, prompt_token_ids=prompt)
     else:
         result_generator = engine.generate(prompt, sampling_params, request_id)
