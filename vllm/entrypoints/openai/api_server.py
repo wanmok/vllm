@@ -387,7 +387,10 @@ async def create_completion(raw_request: Request):
                 HTTPStatus.BAD_REQUEST,
                 "multiple prompts in a batch is not currently supported")
 
-        prompt = request.prompt[0]
+        if isinstance(first_element, int):
+            prompt = request.prompt
+        else:
+            prompt = request.prompt[0]
     else:
         prompt = request.prompt
     created_time = int(time.time())
