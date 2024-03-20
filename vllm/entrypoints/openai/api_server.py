@@ -580,6 +580,8 @@ async def create_completion(request: CompletionRequest, raw_request: Request):
     prompt_token_ids = final_res.prompt_token_ids
     prompt_logprobs = final_res.prompt_logprobs
     prompt_text = final_res.prompt
+    if prompt_text is None:
+        prompt_text = tokenizer.decode(prompt_token_ids)
     for output in final_res.outputs:
         if request.logprobs is not None:
             if not echo_without_generation:
