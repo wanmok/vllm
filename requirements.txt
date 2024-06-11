@@ -1,3 +1,4 @@
+--extra-index-url https://download.pytorch.org/whl/cu118
 ninja  # For faster builds.
 psutil
 ray >= 2.5.1
